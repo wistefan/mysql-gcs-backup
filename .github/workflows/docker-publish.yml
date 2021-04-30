@@ -40,10 +40,10 @@ jobs:
         run: echo "::set-output name=version::$(echo $VERSION)"
 
       - name: Build image
-        run: docker build -t  $IMAGE_NAME:0.0.1 -f Dockerfile .
+        run: docker build -t  $IMAGE_NAME:${VERSION} -f Dockerfile .
 
       - name: Push image
-        run: docker push $IMAGE_NAME:0.0.1
+        run: docker push $IMAGE_NAME:${VERSION}
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
