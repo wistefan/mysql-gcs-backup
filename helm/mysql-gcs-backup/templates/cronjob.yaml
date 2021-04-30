@@ -1,0 +1,52 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ template "mysql-gcs-backup.fullname" . }}
+  labels:
+    app: {{ template "mysql-gcs-backup.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  schedule: {{ .Values.schedule }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: {{ template "mysql-gcs-backup.fullname" . }}
+          labels:
+            app: {{ .Release.Name }}
+            cron: {{ template "mysql-gcs-backup.name" . }}
+        spec:
+          serviceAccountName: {{ .Values.serviceAccountName }}
+          containers:
+          - name: {{ .Chart.Name }}
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            {{ - with .Values.securityContext }}
+            securityContext:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            env:
+              - name: BACKUP_FILE_PREFIX
+                values: {{ .Values.filePrefix }}
+              - name: GCS_BUCKET
+                values: {{ .Values.bucketName }}
+              - name: MYSQL_HOST
+                values: {{ .Values.db.host }}
+              - name: MYSQL_PORT
+                values: {{ .Values.db.port }}
+              - name: MYSQL_USER
+                values: {{ .Values.db.user }}
+              - name: MYSQL_PASSWORD
+                values: {{ .Values.db.password }}
+            volumeMounts:
+              - name: gcp-secret
+                mountPath: /gcs/credentials.json
+                readOnly: true
+            resources:
+  {{ toYaml .Values.resources | indent 12 }}
+          volumes:
+            - name: gcp-secret
+              secret:
+                secretName: {{ .Values.secretName }}
