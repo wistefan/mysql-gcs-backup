@@ -1,22 +1,14 @@
-name: Docker
+name: Release
 
 on:
   push:
-    # Publish `main` as Docker `latest` image.
     branches:
       - main
 
-env:
-  IMAGE_NAME: wistefan/mysql-gcs-backup
-
 jobs:
-  
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
-  build-and-push:
 
+  release:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
 
     steps:
       - uses: actions/checkout@v2
@@ -25,12 +17,12 @@ jobs:
         with:
           java-version: '11'
           java-package: jdk
-
+      
       - id: pr
         uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
+      
       - uses: zwaldowski/semver-release-action@v2
         with:
           dry_run: true
@@ -40,15 +32,19 @@ jobs:
       - name: Log into registry
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+
       - name: Set version output
         id: out
         run: echo "::set-output name=version::$(echo $VERSION)"
 
-      - name: Build image
-        run: docker build -t  $IMAGE_NAME:${VERSION} -f Dockerfile .
-
-      - name: Push image
-        run: docker push $IMAGE_NAME:${VERSION}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: |
+            wistefan/mysql-gcs-backup:${{ steps.out.outputs.version }}
+            wistefan/mysql-gcs-backup:latest
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
