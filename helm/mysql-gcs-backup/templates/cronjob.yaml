@@ -8,7 +8,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  schedule: {{ .Values.schedule }}
+  schedule: {{ .Values.schedule | quote }}
   jobTemplate:
     spec:
       template:
@@ -19,27 +19,28 @@ spec:
             cron: {{ template "mysql-gcs-backup.name" . }}
         spec:
           serviceAccountName: {{ .Values.serviceAccountName }}
+          restartPolicy: Never
           containers:
           - name: {{ .Chart.Name }}
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
-            {{ - with .Values.securityContext }}
+            {{- with .Values.securityContext }}
             securityContext:
               {{- toYaml . | nindent 12 }}
             {{- end }}
             env:
               - name: BACKUP_FILE_PREFIX
-                values: {{ .Values.filePrefix }}
+                value: {{ .Values.filePrefix }}
               - name: GCS_BUCKET
-                values: {{ .Values.bucketName }}
+                value: {{ .Values.bucketName }}
               - name: MYSQL_HOST
-                values: {{ .Values.db.host }}
+                value: {{ .Values.db.host }}
               - name: MYSQL_PORT
-                values: {{ .Values.db.port }}
+                value: {{ .Values.db.port | quote }}
               - name: MYSQL_USER
-                values: {{ .Values.db.user }}
+                value: {{ .Values.db.user }}
               - name: MYSQL_PASSWORD
-                values: {{ .Values.db.password }}
+                value: {{ .Values.db.password }}
             volumeMounts:
               - name: gcp-secret
                 mountPath: /gcs/credentials.json
