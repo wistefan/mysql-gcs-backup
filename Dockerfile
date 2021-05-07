@@ -2,12 +2,12 @@ FROM mysql:5.7
 
 ARG CLOUD_SDK_VERSION=338.0.0
 
-ENV BACKUP_FILE_PREFIX backup
-ENV GCS_KEYFILE_PATH /gcs/credentials.json
-ENV MYSQL_HOST localhost
-ENV MYSQL_PORT 3306
-ENV MYSQL_USER root
-ENV MYSQL_PASSWORD password
+ENV BACKUP_FILE_PREFIX=backup
+ENV GCS_KEYFILE_PATH=/gcs/credentials.json
+ENV MYSQL_HOST=localhost
+ENV MYSQL_PORT=3306
+ENV MYSQL_USER=root
+ENV MYSQL_PASSWORD=password
 
 RUN apt-get update
 RUN apt-get install -y python3 curl
