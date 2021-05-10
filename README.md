@@ -4,7 +4,7 @@ A simple job to backup a complete mysql instance into gcs-bucket.
 
 ## Config
 
-Following env vars are supported:
+Following environment  variables are supported:
 
 |  Env-Var | Description | Default |
 | ----------------- | ----------------------------------------------- | ------------------------ |             
