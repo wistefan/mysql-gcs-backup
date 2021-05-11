@@ -44,10 +44,15 @@ spec:
             volumeMounts:
               - name: gcp-secret
                 mountPath: /gcs/credentials.json
+                subPath: credentials.json
                 readOnly: true
+              - name: temp-folder
+                mountPath: /temp
             resources:
   {{ toYaml .Values.resources | indent 12 }}
           volumes:
             - name: gcp-secret
               secret:
                 secretName: {{ .Values.secretName }}
+            - name: temp-folder
+              emptyDir: {}
